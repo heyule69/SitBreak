@@ -3,6 +3,7 @@ package com.sitbreak.ui.stats
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,16 +75,16 @@ fun StatsScreen(state: StatsUiState) {
     ) {
         Spacer(Modifier.height(16.dp))
         Text(stringResource(R.string.stats_title), fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
-        Spacer(Modifier.height(20.dp))
-        
+        Spacer(Modifier.height(14.dp))
+
         // 连续打卡 hero：照片 + 火焰数据
         StreakHero(state)
-        Spacer(Modifier.height(20.dp))
-        
+        Spacer(Modifier.height(14.dp))
+
         Text(stringResource(R.string.stats_last7), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(10.dp))
         WeeklyChart(state.last7Days)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
         
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.stats_badges), fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -98,9 +99,9 @@ fun StatsScreen(state: StatsUiState) {
                 color = InkGray,
             )
         }
-        Spacer(Modifier.height(12.dp))
-        AchievementGrid(state.achievements)
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(10.dp))
+        AchievementRow(state.achievements)
+        Spacer(Modifier.height(20.dp))
     }
 }
 
@@ -109,7 +110,7 @@ private fun StreakHero(state: StatsUiState) {
     Box(
         Modifier
             .fillMaxWidth()
-            .height(170.dp)
+            .height(136.dp)
             .clip(RoundedCornerShape(28.dp)),
     ) {
         Image(
@@ -191,7 +192,7 @@ private fun WeeklyChart(days: List<DailyStat>) {
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .height(140.dp),
+                        .height(118.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.Bottom,
                 ) {
@@ -284,81 +285,90 @@ private fun LegendDot(color: Color) {
     Box(Modifier.size(8.dp).clip(CircleShape).background(color))
 }
 
+/**
+ * 成就徽章改为单行横向滑动：整体页面一屏装得下，徽章多了也不撑高版面
+ */
 @Composable
-private fun AchievementGrid(states: List<com.sitbreak.domain.AchievementState>) {
-    states.chunked(2).forEach { rowItems ->
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            rowItems.forEach { a ->
-                Card(
-                    modifier = Modifier.weight(1f),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (a.unlocked) MaterialTheme.colorScheme.surface
-                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    shape = RoundedCornerShape(20.dp),
+private fun AchievementRow(states: List<com.sitbreak.domain.AchievementState>) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        states.forEach { a ->
+            AchievementCard(Modifier.width(216.dp), a)
+        }
+    }
+}
+
+@Composable
+private fun AchievementCard(modifier: Modifier, a: com.sitbreak.domain.AchievementState) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = if (a.unlocked) MaterialTheme.colorScheme.surface
+            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        shape = RoundedCornerShape(20.dp),
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(if (a.unlocked) Coral else MaterialTheme.colorScheme.outline),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Column(Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                Modifier
-                                    .size(38.dp)
-                                    .clip(CircleShape)
-                                    .background(if (a.unlocked) Coral else MaterialTheme.colorScheme.outline),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    painterResource(if (a.unlocked) R.drawable.ic_medal else R.drawable.ic_trophy),
-                                    null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp).alpha(if (a.unlocked) 1f else 0.5f),
-                                )
-                            }
-                            Spacer(Modifier.width(10.dp))
-                            Column {
-                                Text(
-                                    stringResource(a.achievement.titleRes),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (a.unlocked) MaterialTheme.colorScheme.onSurface else InkGray,
-                                )
-                                Text(
-                                    if (a.unlocked) stringResource(R.string.stats_unlocked)
-                                    else stringResource(R.string.stats_percent, (a.progress * 100).toInt()),
-                                    fontSize = 11.sp,
-                                    color = if (a.unlocked) Coral else InkGray,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(10.dp))
-                        Text(
-                            stringResource(a.achievement.descRes),
-                            fontSize = 11.sp,
-                            color = InkGray,
-                            lineHeight = 15.sp,
-                        )
-                        Spacer(Modifier.height(10.dp))
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.outline),
-                        ) {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth(a.progress)
-                                    .height(6.dp)
-                                    .clip(CircleShape)
-                                    .background(if (a.unlocked) Coral else Sunny),
-                            )
-                        }
-                    }
+                    Icon(
+                        painterResource(if (a.unlocked) R.drawable.ic_medal else R.drawable.ic_trophy),
+                        null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp).alpha(if (a.unlocked) 1f else 0.5f),
+                    )
+                }
+                Spacer(Modifier.width(10.dp))
+                Column {
+                    Text(
+                        stringResource(a.achievement.titleRes),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (a.unlocked) MaterialTheme.colorScheme.onSurface else InkGray,
+                    )
+                    Text(
+                        if (a.unlocked) stringResource(R.string.stats_unlocked)
+                        else stringResource(R.string.stats_percent, (a.progress * 100).toInt()),
+                        fontSize = 11.sp,
+                        color = if (a.unlocked) Coral else InkGray,
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
             }
-            if (rowItems.size == 1) Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(10.dp))
+            Text(
+                stringResource(a.achievement.descRes),
+                fontSize = 11.sp,
+                color = InkGray,
+                lineHeight = 15.sp,
+            )
+            Spacer(Modifier.height(10.dp))
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.outline),
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxWidth(a.progress)
+                        .height(6.dp)
+                        .clip(CircleShape)
+                        .background(if (a.unlocked) Coral else Sunny),
+                )
+            }
         }
-        Spacer(Modifier.height(12.dp))
     }
 }

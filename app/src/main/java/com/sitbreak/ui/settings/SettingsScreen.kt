@@ -2,12 +2,21 @@ package com.sitbreak.ui.settings
 
 import android.app.Activity
 import android.app.TimePickerDialog
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,9 +35,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -39,6 +52,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +64,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.sitbreak.R
 import com.sitbreak.SitBreakApp
 import com.sitbreak.data.ReminderStyle
@@ -57,7 +74,7 @@ import com.sitbreak.domain.QuietHours
 import com.sitbreak.domain.RecommendEngine
 import com.sitbreak.service.ReminderActions
 import com.sitbreak.service.SmartPauseDetector
-import com.sitbreak.ui.components.SitBreakSlider
+import com.sitbreak.ui.components.StepperSliderRow
 import com.sitbreak.ui.theme.Coral
 import com.sitbreak.ui.theme.CoralSoft
 import com.sitbreak.ui.theme.Indigo
@@ -81,11 +98,91 @@ fun SettingsRoute(app: SitBreakApp) {
     SettingsScreen(state, vm)
 }
 
+/** 设置子页。null = 根列表 */
+private enum class SettingsPage { Rhythm, Style, Quiet, Tracking, Permission, Language, Widget, About }
+
 @Composable
 fun SettingsScreen(state: SettingsUiState, vm: SettingsViewModel) {
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var page by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
+    BackHandler(enabled = page != null) { page = null }
+
+    AnimatedContent(
+        targetState = page,
+        label = "settings_nav",
+        transitionSpec = {
+            // 进入子页从右侧滑入，返回根列表滑回右侧，与主流 App 的层级动效一致
+            if (targetState != null) {
+                (slideInHorizontally { it / 3 } + fadeIn()) togetherWith
+                    (slideOutHorizontally { -it / 3 } + fadeOut())
+            } else {
+                (slideInHorizontally { -it / 3 } + fadeIn()) togetherWith
+                    (slideOutHorizontally { it / 3 } + fadeOut())
+            }
+        },
+    ) { current ->
+        when (current) {
+            null -> SettingsHome(state, vm, onOpen = { page = it })
+            SettingsPage.Rhythm -> SubPage(stringResource(R.string.interval_title), { page = null }) {
+                IntervalSection(
+                    interval = state.settings.intervalMinutes,
+                    isRecommended = state.settings.intervalIsRecommended,
+                    recommended = vm.recommendedMinutes(),
+                    onChange = vm::setInterval,
+                    onRestore = vm::restoreRecommend,
+                )
+            }
+            SettingsPage.Style -> SubPage(stringResource(R.string.settings_section_style), { page = null }) {
+                StyleSection(state.settings.style, vm::setStyle)
+            }
+            SettingsPage.Quiet -> SubPage(stringResource(R.string.quiet_title), { page = null }) {
+                QuietHoursCard(
+                    enabled = state.settings.quietEnabled,
+                    startMinute = state.settings.quietStartMinute,
+                    endMinute = state.settings.quietEndMinute,
+                    onToggle = vm::setQuietEnabled,
+                    onRangeChange = vm::setQuietRange,
+                )
+            }
+            SettingsPage.Tracking -> SubPage(stringResource(R.string.settings_section_tracking), { page = null }) {
+                val context = LocalContext.current
+                val scope = androidx.compose.runtime.rememberCoroutineScope()
+                TrackingCard(
+                    enabled = state.settings.trackingEnabled,
+                    onToggle = { enabled ->
+                        scope.launch {
+                            if (enabled) ReminderActions.startTracking(context)
+                            else ReminderActions.pauseTracking(context)
+                        }
+                    },
+                )
+                Spacer(Modifier.height(10.dp))
+                SmartPauseCard(enabled = state.settings.smartPauseEnabled, onToggle = vm::setSmartPause)
+            }
+            SettingsPage.Permission -> SubPage(stringResource(R.string.settings_section_permission), { page = null }) {
+                PermissionSection(allowed = state.exactAlarmAllowed)
+            }
+            SettingsPage.Language -> SubPage(stringResource(R.string.settings_section_language), { page = null }) {
+                LanguageCard()
+            }
+            SettingsPage.Widget -> SubPage(stringResource(R.string.settings_entry_widget), { page = null }) {
+                WidgetCard()
+            }
+            SettingsPage.About -> SubPage(stringResource(R.string.settings_section_about), { page = null }) {
+                AboutCard()
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsHome(state: SettingsUiState, vm: SettingsViewModel, onOpen: (SettingsPage) -> Unit) {
     val context = LocalContext.current
     val s = state.settings
+    // 小组件是否已添加：从子页返回时根列表重新进组合，此处会重查一次
+    val widgetAdded = remember {
+        AppWidgetManager.getInstance(context)
+            .getAppWidgetIds(ComponentName(context, SitBreakWidget::class.java)).isNotEmpty()
+    }
 
     Column(
         modifier = Modifier
@@ -100,102 +197,173 @@ fun SettingsScreen(state: SettingsUiState, vm: SettingsViewModel) {
         Spacer(Modifier.height(20.dp))
 
         SectionTitle(stringResource(R.string.settings_section_rhythm))
-        IntervalCard(
-            interval = s.intervalMinutes,
-            isRecommended = s.intervalIsRecommended,
-            recommended = vm.recommendedMinutes(),
-            onChange = vm::setInterval,
-            onRestore = vm::restoreRecommend,
-        )
-        Spacer(Modifier.height(20.dp))
-
-        SectionTitle(stringResource(R.string.settings_section_style))
-        StyleCard(
-            style = ReminderStyle.LIGHT,
-            current = s.style,
-            icon = R.drawable.ic_vibrate,
-            title = stringResource(R.string.style_light_title),
-            desc = stringResource(R.string.style_light_desc),
-            tint = Mint,
-            container = MintSoft,
-            onSelect = vm::setStyle,
-        )
-        Spacer(Modifier.height(10.dp))
-        StyleCard(
-            style = ReminderStyle.STANDARD,
-            current = s.style,
-            icon = R.drawable.ic_volume_high,
-            title = stringResource(R.string.style_standard_title),
-            desc = stringResource(R.string.style_standard_desc),
-            tint = Sunny,
-            container = SunnySoft,
-            onSelect = vm::setStyle,
-        )
-        Spacer(Modifier.height(10.dp))
-        StyleCard(
-            style = ReminderStyle.STRONG,
-            current = s.style,
-            icon = R.drawable.ic_alarm,
-            title = stringResource(R.string.style_strong_title),
-            desc = stringResource(R.string.style_strong_desc),
-            tint = Coral,
-            container = CoralSoft,
-            onSelect = vm::setStyle,
+        SettingsGroupCard(
+            Entry(
+                R.string.interval_title,
+                stringResource(
+                    R.string.settings_summary_interval,
+                    s.intervalMinutes,
+                    stringResource(if (s.intervalIsRecommended) R.string.interval_is_recommended else R.string.interval_custom),
+                ),
+                R.drawable.ic_timer, Coral, CoralSoft, SettingsPage.Rhythm,
+            ),
+            Entry(
+                R.string.settings_section_style,
+                stringResource(styleTitleRes(s.style)),
+                R.drawable.ic_alarm, Sunny, SunnySoft, SettingsPage.Style,
+            ),
+            Entry(
+                R.string.quiet_title,
+                if (s.quietEnabled) stringResource(
+                    R.string.quiet_desc_on,
+                    QuietHours.format(s.quietStartMinute),
+                    QuietHours.format(s.quietEndMinute),
+                ) else stringResource(R.string.quiet_desc_off),
+                R.drawable.ic_moon, Indigo, IndigoSoft, SettingsPage.Quiet,
+            ),
+            onOpen = onOpen,
         )
         Spacer(Modifier.height(20.dp))
 
         SectionTitle(stringResource(R.string.settings_section_tracking))
-        TrackingCard(
-            enabled = s.trackingEnabled,
-            onToggle = { enabled ->
-                scope.launch {
-                    if (enabled) ReminderActions.startTracking(context) else ReminderActions.pauseTracking(context)
-                }
-            },
-        )
-        Spacer(Modifier.height(10.dp))
-        SmartPauseCard(
-            enabled = s.smartPauseEnabled,
-            onToggle = vm::setSmartPause,
-        )
-        Spacer(Modifier.height(20.dp))
-
-        SectionTitle(stringResource(R.string.settings_section_quiet))
-        QuietHoursCard(
-            enabled = s.quietEnabled,
-            startMinute = s.quietStartMinute,
-            endMinute = s.quietEndMinute,
-            onToggle = vm::setQuietEnabled,
-            onRangeChange = vm::setQuietRange,
+        SettingsGroupCard(
+            Entry(
+                R.string.tracking_title,
+                stringResource(if (s.trackingEnabled) R.string.tracking_on else R.string.tracking_off),
+                R.drawable.ic_power, Mint, MintSoft, SettingsPage.Tracking,
+            ),
+            Entry(
+                R.string.smart_pause_title,
+                if (SmartPauseDetector.isSupported(context)) stringResource(R.string.smart_pause_desc)
+                else stringResource(R.string.smart_pause_unsupported),
+                R.drawable.ic_run_fast, Sunny, SunnySoft, SettingsPage.Tracking,
+            ),
+            onOpen = onOpen,
         )
         Spacer(Modifier.height(20.dp))
 
-        SectionTitle(stringResource(R.string.settings_section_permission))
-        PermissionCard(
-            title = stringResource(R.string.perm_exact_alarm_title),
-            desc = if (state.exactAlarmAllowed) stringResource(R.string.perm_exact_alarm_ok)
-            else stringResource(R.string.perm_exact_alarm_missing),
-            ok = state.exactAlarmAllowed,
-            onAction = {
-                if (!state.exactAlarmAllowed) {
-                    runCatching {
-                        context.startActivity(
-                            Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                                .setData(Uri.parse("package:${context.packageName}"))
-                        )
-                    }
-                }
-            },
+        SectionTitle(stringResource(R.string.settings_section_general))
+        SettingsGroupCard(
+            Entry(
+                R.string.perm_exact_alarm_title,
+                stringResource(if (state.exactAlarmAllowed) R.string.perm_exact_alarm_ok else R.string.perm_exact_alarm_missing),
+                R.drawable.ic_shield, if (state.exactAlarmAllowed) Mint else Sunny,
+                if (state.exactAlarmAllowed) MintSoft else SunnySoft, SettingsPage.Permission,
+            ),
+            Entry(
+                R.string.language_title,
+                languageLabel(context),
+                R.drawable.ic_translate, Indigo, IndigoSoft, SettingsPage.Language,
+            ),
+            Entry(
+                R.string.settings_entry_widget,
+                stringResource(
+                    if (widgetAdded) R.string.widget_status_added else R.string.widget_status_not_added,
+                ),
+                R.drawable.ic_widget, Coral, CoralSoft, SettingsPage.Widget,
+            ),
+            Entry(
+                R.string.settings_section_about,
+                stringResource(R.string.about_version),
+                R.drawable.ic_info, Sunny, SunnySoft, SettingsPage.About,
+            ),
+            onOpen = onOpen,
         )
-        Spacer(Modifier.height(20.dp))
-
-        SectionTitle(stringResource(R.string.settings_section_language))
-        LanguageCard()
-        Spacer(Modifier.height(20.dp))
-
-        SectionTitle(stringResource(R.string.settings_section_about))
-        AboutCard()
         Spacer(Modifier.height(28.dp))
+    }
+}
+
+private data class Entry(
+    val titleRes: Int,
+    val summary: String,
+    val iconRes: Int,
+    val iconTint: Color,
+    val iconBg: Color,
+    val page: SettingsPage,
+)
+
+@Composable
+private fun SettingsGroupCard(vararg entries: Entry, onOpen: (SettingsPage) -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        shape = RoundedCornerShape(24.dp),
+    ) {
+        Column {
+            entries.forEachIndexed { index, entry ->
+                EntryRow(entry) { onOpen(entry.page) }
+                if (index < entries.lastIndex) {
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                        modifier = Modifier.padding(start = 68.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EntryRow(entry: Entry, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier.size(40.dp).clip(CircleShape).background(entry.iconBg),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(painterResource(entry.iconRes), null, tint = entry.iconTint, modifier = Modifier.size(20.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(entry.titleRes), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Spacer(Modifier.height(2.dp))
+            Text(entry.summary, fontSize = 12.sp, color = InkGray, maxLines = 2)
+        }
+        Spacer(Modifier.width(8.dp))
+        Icon(
+            painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = InkGray.copy(alpha = 0.6f),
+            modifier = Modifier.size(18.dp),
+        )
+    }
+}
+
+/** 子页骨架：返回箭头 + 标题 + 可滚动内容 */
+@Composable
+private fun SubPage(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding(),
+    ) {
+        Row(
+            Modifier.height(52.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    painterResource(R.drawable.ic_arrow_left),
+                    contentDescription = stringResource(R.string.action_back),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Text(title, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+        }
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp),
+        ) {
+            content()
+            Spacer(Modifier.height(24.dp))
+        }
     }
 }
 
@@ -210,8 +378,20 @@ private fun SectionTitle(text: String) {
     )
 }
 
+private fun styleTitleRes(style: ReminderStyle): Int = when (style) {
+    ReminderStyle.LIGHT -> R.string.style_light_title
+    ReminderStyle.STANDARD -> R.string.style_standard_title
+    ReminderStyle.STRONG -> R.string.style_strong_title
+}
+
+private fun languageLabel(context: Context): String = when (AppLocale.current(context)) {
+    AppLocale.ZH -> context.getString(R.string.language_native_zh)
+    AppLocale.EN -> context.getString(R.string.language_native_en)
+    else -> context.getString(R.string.language_follow_system)
+}
+
 @Composable
-private fun IntervalCard(
+private fun IntervalSection(
     interval: Int,
     isRecommended: Boolean,
     recommended: Int,
@@ -246,9 +426,9 @@ private fun IntervalCard(
                 Text(stringResource(R.string.unit_minutes), fontSize = 12.sp, color = InkGray)
             }
             Spacer(Modifier.height(12.dp))
-            SitBreakSlider(
-                value = interval.toFloat(),
-                onValueChange = { onChange(it.toInt()) },
+            StepperSliderRow(
+                value = interval,
+                onValueChange = onChange,
                 valueRange = RecommendEngine.MIN_INTERVAL.toFloat()..RecommendEngine.MAX_INTERVAL.toFloat(),
                 accent = Coral,
                 trackColor = CoralSoft,
@@ -273,6 +453,42 @@ private fun IntervalCard(
             }
         }
     }
+}
+
+@Composable
+private fun StyleSection(current: ReminderStyle, onSelect: (ReminderStyle) -> Unit) {
+    StyleCard(
+        style = ReminderStyle.LIGHT,
+        current = current,
+        icon = R.drawable.ic_vibrate,
+        title = stringResource(R.string.style_light_title),
+        desc = stringResource(R.string.style_light_desc),
+        tint = Mint,
+        container = MintSoft,
+        onSelect = onSelect,
+    )
+    Spacer(Modifier.height(10.dp))
+    StyleCard(
+        style = ReminderStyle.STANDARD,
+        current = current,
+        icon = R.drawable.ic_volume_high,
+        title = stringResource(R.string.style_standard_title),
+        desc = stringResource(R.string.style_standard_desc),
+        tint = Sunny,
+        container = SunnySoft,
+        onSelect = onSelect,
+    )
+    Spacer(Modifier.height(10.dp))
+    StyleCard(
+        style = ReminderStyle.STRONG,
+        current = current,
+        icon = R.drawable.ic_alarm,
+        title = stringResource(R.string.style_strong_title),
+        desc = stringResource(R.string.style_strong_desc),
+        tint = Coral,
+        container = CoralSoft,
+        onSelect = onSelect,
+    )
 }
 
 @Composable
@@ -493,29 +709,45 @@ private fun TimeField(
 }
 
 @Composable
-private fun PermissionCard(title: String, desc: String, ok: Boolean, onAction: () -> Unit) {
+private fun PermissionSection(allowed: Boolean) {
+    val context = LocalContext.current
     Card(
-        onClick = onAction,
+        onClick = {
+            if (!allowed) {
+                runCatching {
+                    context.startActivity(
+                        Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                            .setData(Uri.parse("package:${context.packageName}"))
+                    )
+                }
+            }
+        },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(20.dp),
     ) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                Modifier.size(42.dp).clip(CircleShape).background(if (ok) MintSoft else SunnySoft),
+                Modifier.size(42.dp).clip(CircleShape).background(if (allowed) MintSoft else SunnySoft),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     painterResource(R.drawable.ic_shield), null,
-                    tint = if (ok) Mint else Sunny, modifier = Modifier.size(22.dp),
+                    tint = if (allowed) Mint else Sunny, modifier = Modifier.size(22.dp),
                 )
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                Text(desc, fontSize = 12.sp, color = InkGray)
+                Text(
+                    stringResource(R.string.perm_exact_alarm_title),
+                    fontWeight = FontWeight.Bold, fontSize = 15.sp,
+                )
+                Text(
+                    stringResource(if (allowed) R.string.perm_exact_alarm_ok else R.string.perm_exact_alarm_missing),
+                    fontSize = 12.sp, color = InkGray,
+                )
             }
-            if (!ok) {
+            if (!allowed) {
                 Text(stringResource(R.string.perm_action_open), fontSize = 13.sp, color = Coral, fontWeight = FontWeight.Bold)
             }
         }
@@ -584,12 +816,100 @@ private fun LanguageRow(label: String, selected: Boolean, onSelect: () -> Unit) 
 /**
  * 切语言。
  *
- * 小组件不会自己重新渲染，得主动推一下；常驻通知由前台服务的秒级 tick 自行刷新。
+ * 小组件不会自己重新渲染，得主动推一下；常驻通知由前台服务的分钟级 tick 自行刷新。
  */
 private fun switchLanguage(context: Context, tag: String) {
     val needsRecreate = AppLocale.apply(context, tag)
     SitBreakWidget.refresh(context)
     if (needsRecreate) (context as? Activity)?.recreate()
+}
+
+/**
+ * 桌面小组件页：状态展示 + 一键添加。
+ *
+ * 小组件由桌面（launcher）管理，App 内做不了真正的"开关"；这里做的是把
+ * 添加动作收进来 —— requestPinAppWidget 会弹系统确认，省去教用户长按桌面。
+ */
+@Composable
+private fun WidgetCard() {
+    val context = LocalContext.current
+    val awm = remember { AppWidgetManager.getInstance(context) }
+    val provider = remember { ComponentName(context, SitBreakWidget::class.java) }
+    var added by remember { mutableStateOf(awm.getAppWidgetIds(provider).isNotEmpty()) }
+    var pinSupported by remember { mutableStateOf(awm.isRequestPinAppWidgetSupported) }
+
+    // 一键添加的确认流程会把用户带离应用，回到前台时重查状态
+    val owner = LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(owner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                added = awm.getAppWidgetIds(provider).isNotEmpty()
+            }
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        shape = RoundedCornerShape(20.dp),
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier.size(42.dp).clip(CircleShape).background(CoralSoft),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(painterResource(R.drawable.ic_widget), null, tint = Coral, modifier = Modifier.size(22.dp))
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.settings_entry_widget),
+                        fontWeight = FontWeight.Bold, fontSize = 15.sp,
+                    )
+                    Text(
+                        stringResource(
+                            if (added) R.string.widget_status_added else R.string.widget_status_not_added,
+                        ),
+                        fontSize = 12.sp,
+                        color = if (added) Mint else InkGray,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            Text(
+                stringResource(R.string.widget_add_hint),
+                fontSize = 12.sp, color = InkGray, lineHeight = 18.sp,
+            )
+            Spacer(Modifier.height(16.dp))
+            if (added) {
+                Text(
+                    stringResource(R.string.widget_status_added),
+                    fontSize = 13.sp, color = Mint, fontWeight = FontWeight.Bold,
+                )
+            } else if (pinSupported) {
+                Button(
+                    onClick = {
+                        // 返回 false 说明桌面拒绝了请求（少见），退回手动指引
+                        pinSupported = awm.requestPinAppWidget(provider, null, null)
+                    },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Coral),
+                ) {
+                    Text(stringResource(R.string.widget_action_add), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            } else {
+                Text(
+                    stringResource(R.string.widget_pin_unsupported),
+                    fontSize = 12.sp, color = InkGray, lineHeight = 18.sp,
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -599,11 +919,19 @@ private fun AboutCard() {
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(20.dp),
     ) {
-        Column(Modifier.padding(16.dp), Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.about_version), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Column(
+            Modifier.fillMaxWidth().padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Text(
-                stringResource(R.string.about_credits),
-                fontSize = 12.sp, color = InkGray, lineHeight = 18.sp,
+                stringResource(R.string.about_version),
+                fontWeight = FontWeight.Bold, fontSize = 15.sp,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.about_slogan),
+                fontSize = 13.sp, color = InkGray, lineHeight = 20.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
         }
     }

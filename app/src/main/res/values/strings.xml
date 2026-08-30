@@ -123,6 +123,7 @@
     <string name="interval_custom">已自定义</string>
     <string name="unit_minutes">分钟</string>
     <string name="interval_recommend">推荐 %1$d 分钟</string>
+    <string name="settings_summary_interval">%1$d 分钟 · %2$s</string>
     <string name="action_restore">一键恢复</string>
     <string name="style_light_title">轻提醒（推荐）</string>
     <string name="style_light_desc">微信风格：只弹通知，轻轻震动一下</string>
@@ -137,8 +138,15 @@
     <string name="perm_exact_alarm_ok">已允许，提醒将准时触发</string>
     <string name="perm_exact_alarm_missing">未允许时提醒可能略有延迟，建议开启</string>
     <string name="perm_action_open">去开启</string>
-    <string name="about_version">SitBreak v1.0.0</string>
-    <string name="about_credits">图标来自 Iconify (Material Design Icons)，照片来自 Pexels。\n久坐有害健康，快起来动一动吧！</string>
+    <string name="about_version">SitBreak v1.1.0</string>
+    <string name="about_slogan">久坐有害健康，快起来动一动吧！</string>
+    <string name="settings_section_general">通用</string>
+    <string name="settings_entry_widget">桌面小组件</string>
+    <string name="widget_status_added">已添加到桌面</string>
+    <string name="widget_status_not_added">未添加</string>
+    <string name="widget_action_add">添加到桌面</string>
+    <string name="widget_add_hint">在桌面直接查看倒计时、一键打卡，无需打开应用</string>
+    <string name="widget_pin_unsupported">当前桌面不支持一键添加，请长按桌面空白处，在「小部件」中找到 SitBreak 添加</string>
 
     <!-- 语言 -->
     <string name="settings_section_language">语言</string>

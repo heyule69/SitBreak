@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -36,6 +37,8 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sitbreak.R
+import kotlin.math.roundToInt
 
 private val ThumbSize = 24.dp
 private val TrackHeight = 12.dp
@@ -146,4 +149,49 @@ private fun RangeLabel(text: String?) {
         fontWeight = FontWeight.Medium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+}
+
+/**
+ * 滑杆 + 两侧 ±1 步进按钮：滑杆粗调（四舍五入取整），按钮精调（长按连发）。
+ *
+ * 单靠滑杆难以精确落在某个整数上：连续值 + toInt() 截断会让显示值系统性
+ * 偏小一格，量程越宽越难命中。粗精双通道是健康类 App 的通行做法。
+ */
+@Composable
+fun StepperSliderRow(
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    accent: Color,
+    trackColor: Color,
+    modifier: Modifier = Modifier,
+    marker: Float? = null,
+    minLabel: String? = null,
+    maxLabel: String? = null,
+) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        StepperButton(
+            iconRes = R.drawable.ic_minus,
+            tint = accent,
+            enabled = value > valueRange.start,
+        ) { onValueChange((value - 1).coerceAtLeast(valueRange.start.toInt())) }
+        SitBreakSlider(
+            value = value.toFloat(),
+            onValueChange = {
+                onValueChange(it.roundToInt().coerceIn(valueRange.start.toInt(), valueRange.endInclusive.toInt()))
+            },
+            valueRange = valueRange,
+            accent = accent,
+            trackColor = trackColor,
+            modifier = Modifier.weight(1f),
+            marker = marker,
+            minLabel = minLabel,
+            maxLabel = maxLabel,
+        )
+        StepperButton(
+            iconRes = R.drawable.ic_plus,
+            tint = accent,
+            enabled = value < valueRange.endInclusive,
+        ) { onValueChange((value + 1).coerceAtMost(valueRange.endInclusive.toInt())) }
+    }
 }

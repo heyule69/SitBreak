@@ -1,8 +1,10 @@
 package com.sitbreak.service
 
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.IBinder
 import com.sitbreak.SitBreakApp
 import com.sitbreak.domain.QuietHours
@@ -25,6 +27,13 @@ class ReminderForegroundService : Service() {
     private var tickJob: kotlinx.coroutines.Job? = null
     private var detector: SmartPauseDetector? = null
 
+    /** 亮屏/解锁瞬间补一次刷新：灭屏期间 tick 循环随 CPU 休眠停摆，恢复可见时要立刻追上 */
+    private val screenOnReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            scope.launch { refreshTick() }
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         app = application as SitBreakApp
@@ -33,6 +42,10 @@ class ReminderForegroundService : Service() {
             // 传感器回调在主线程，结算走协程
             scope.launch { ReminderActions.confirmStand(this@ReminderForegroundService, auto = true) }
         }
+        registerReceiver(
+            screenOnReceiver,
+            IntentFilter(Intent.ACTION_SCREEN_ON).apply { addAction(Intent.ACTION_USER_PRESENT) },
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -84,21 +97,41 @@ class ReminderForegroundService : Service() {
         }
         // 取消旧 tick 再启动，避免多次 start 产生并发循环
         tickJob?.cancel()
-        tickJob = scope.launch { tickLoop(begin, interval) }
+        tickJob = scope.launch { tickLoop() }
     }
 
-    private suspend fun tickLoop(begin: Long, intervalMinutes: Int) {
+    /**
+     * 按当前设置现算一遍常驻通知与小组件。
+     * @return 会话起点毫秒；未在追踪时返回 -1，调用方按普通 60s 兜底轮询
+     */
+    private suspend fun refreshTick(): Long {
+        val s = app.prefs.current()
+        val begin = s.sessionBeginMillis
+        if (!s.trackingEnabled || begin <= 0L) return -1L
+        val now = System.currentTimeMillis()
+        val satMin = (now - begin) / 60_000L
+        val interval = s.intervalMinutes.coerceAtLeast(1)
+        val nextIn = interval - (satMin % interval)
+        NotificationHelper.notifyOngoing(this, satMin, nextIn.toLong(), tracking = true)
+        SitBreakWidget.refresh(this)
+        return begin
+    }
+
+    private suspend fun tickLoop() {
         while (true) {
-            val now = System.currentTimeMillis()
-            val satMin = (now - begin) / 60_000L
-            val nextIn = intervalMinutes - (satMin % intervalMinutes)
-            NotificationHelper.notifyOngoing(this@ReminderForegroundService, satMin, nextIn.toLong(), true)
-            SitBreakWidget.refresh(this@ReminderForegroundService)
-            delay(60_000L)
+            val begin = refreshTick()
+            // 不能 delay(60_000) 了事：协程 delay 会随调度累积漂移，几分钟下来通知就
+            // 落后应用内时钟。对齐到会话起点的下一个整分边界，误差不随时间累积
+            val wait = if (begin <= 0L) 60_000L else {
+                (60_000L - (System.currentTimeMillis() - begin) % 60_000L)
+                    .coerceIn(1_000L, 60_000L)
+            }
+            delay(wait)
         }
     }
 
     override fun onDestroy() {
+        unregisterReceiver(screenOnReceiver)
         tickJob?.cancel()
         detector?.stop()
         scope.cancel()

@@ -125,6 +125,7 @@
     <string name="interval_custom">Custom</string>
     <string name="unit_minutes">min</string>
     <string name="interval_recommend">Suggested: %1$d min</string>
+    <string name="settings_summary_interval">%1$d min · %2$s</string>
     <string name="action_restore">Restore</string>
     <string name="style_light_title">Gentle (recommended)</string>
     <string name="style_light_desc">Just a notification and one short buzz</string>
@@ -139,8 +140,15 @@
     <string name="perm_exact_alarm_ok">Allowed, reminders fire on time</string>
     <string name="perm_exact_alarm_missing">Without it reminders may be delayed</string>
     <string name="perm_action_open">Grant</string>
-    <string name="about_version">SitBreak v1.0.0</string>
-    <string name="about_credits">Icons from Iconify (Material Design Icons), photos from Pexels.\nSitting too long hurts — get up and move!</string>
+    <string name="about_version">SitBreak v1.1.0</string>
+    <string name="about_slogan">Sitting too long hurts — get up and move!</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_entry_widget">Home screen widget</string>
+    <string name="widget_status_added">Added to home screen</string>
+    <string name="widget_status_not_added">Not added</string>
+    <string name="widget_action_add">Add to home screen</string>
+    <string name="widget_add_hint">See the countdown and log breaks right from your home screen</string>
+    <string name="widget_pin_unsupported">Your launcher doesn\'t support one-tap pinning. Long-press an empty spot on the home screen and find SitBreak under widgets</string>
 
     <!-- Language -->
     <string name="settings_section_language">Language</string>

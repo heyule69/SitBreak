@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.sitbreak.R
 import com.sitbreak.SitBreakApp
 import com.sitbreak.domain.RecommendEngine
-import com.sitbreak.ui.components.SitBreakSlider
+import com.sitbreak.ui.components.StepperSliderRow
 import com.sitbreak.ui.theme.Coral
 import com.sitbreak.ui.theme.CoralGlow
 import com.sitbreak.ui.theme.CoralSoft
@@ -273,9 +273,9 @@ private fun SliderCard(
                 Text(unit, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Spacer(Modifier.height(8.dp))
-            SitBreakSlider(
-                value = value.toFloat(),
-                onValueChange = { onChange(it.toInt()) },
+            StepperSliderRow(
+                value = value,
+                onValueChange = onChange,
                 valueRange = range,
                 accent = tint,
                 trackColor = container,
@@ -375,9 +375,9 @@ private fun RecommendStep(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
-    SitBreakSlider(
-        value = state.intervalMinutes.toFloat(),
-        onValueChange = { onInterval(it.toInt()) },
+    StepperSliderRow(
+        value = state.intervalMinutes,
+        onValueChange = onInterval,
         valueRange = RecommendEngine.MIN_INTERVAL.toFloat()..RecommendEngine.MAX_INTERVAL.toFloat(),
         accent = Coral,
         trackColor = CoralSoft,
