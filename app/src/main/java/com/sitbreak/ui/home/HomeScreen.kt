@@ -1,7 +1,9 @@
 package com.sitbreak.ui.home
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,8 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -35,24 +36,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sitbreak.R
 import com.sitbreak.SitBreakApp
 import com.sitbreak.ui.theme.Coral
-import com.sitbreak.ui.theme.CoralGlow
 import com.sitbreak.ui.theme.CoralSoft
+import com.sitbreak.ui.theme.InkBlack
 import com.sitbreak.ui.theme.InkGray
 import com.sitbreak.ui.theme.Mint
 import com.sitbreak.ui.theme.MintSoft
@@ -92,60 +93,103 @@ fun HomeScreen(
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 20.dp),
     ) {
         Spacer(Modifier.height(16.dp))
         HeaderRow(onOpenSettings)
-        Spacer(Modifier.height(20.dp))
-        TimerHeroCard(state, onToggleTracking)
-        Spacer(Modifier.height(20.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Spacer(Modifier.height(14.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            StatusPill(state.tracking)
+        }
+        PlantScene(
+            droop = state.cycleProgress,
+            tracking = state.tracking,
+            standCount = state.today.standCount,
+        )
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            val sec = state.nextRemindInSeconds
+            Text(
+                String.format("%02d:%02d", sec / 60, sec % 60),
+                fontSize = 44.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = InkBlack,
+            )
+            Text(
+                stringResource(R.string.home_next_remind),
+                fontSize = 12.sp,
+                color = InkGray,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        WaterBar(state.cycleProgress)
+        Spacer(Modifier.height(14.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            FilledIconButton(
+                onClick = onToggleTracking,
+                modifier = Modifier
+                    .size(46.dp)
+                    .shadow(2.dp, CircleShape),
+                shape = CircleShape,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = InkGray,
+                ),
+            ) {
+                Icon(
+                    painterResource(if (state.tracking) R.drawable.ic_pause else R.drawable.ic_play),
+                    stringResource(if (state.tracking) R.string.action_pause else R.string.action_start),
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+            Button(
+                onClick = onOpenStandConfirm,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+                    .shadow(6.dp, RoundedCornerShape(percent = 50)),
+                shape = RoundedCornerShape(percent = 50),
+                colors = ButtonDefaults.buttonColors(containerColor = Mint),
+            ) {
+                Icon(painterResource(R.drawable.ic_drop), null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.action_stand), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+        Spacer(Modifier.height(14.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StatChip(
                 modifier = Modifier.weight(1f),
-                icon = R.drawable.ic_clock,
                 label = stringResource(R.string.home_stat_sedentary),
                 value = DurationText.compact(LocalContext.current, state.today.sedentaryMinutes),
-                tint = Sunny,
                 container = SunnySoft,
+                tint = SunnyInk,
             )
             StatChip(
                 modifier = Modifier.weight(1f),
-                icon = R.drawable.ic_shoe_print,
                 label = stringResource(R.string.home_stat_stands),
                 value = pluralStringResource(
                     R.plurals.value_times,
                     state.today.standCount,
                     state.today.standCount,
                 ),
-                tint = Mint,
                 container = MintSoft,
+                tint = Mint,
             )
             StatChip(
                 modifier = Modifier.weight(1f),
-                icon = R.drawable.ic_fire,
                 label = stringResource(R.string.home_stat_streak),
                 value = pluralStringResource(R.plurals.value_days, state.streak, state.streak),
-                tint = Coral,
                 container = CoralSoft,
+                tint = Coral,
             )
         }
-        Spacer(Modifier.height(24.dp))
-        Button(
-            onClick = onOpenStandConfirm,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(58.dp)
-                .shadow(8.dp, RoundedCornerShape(20.dp)),
-            shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Mint),
-        ) {
-            Icon(painterResource(R.drawable.ic_walk), null, modifier = Modifier.size(22.dp))
-            Spacer(Modifier.size(10.dp))
-            Text(stringResource(R.string.action_stand), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-        }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
         HintCard()
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
     }
 
     if (state.showStandConfirm) {
@@ -168,7 +212,7 @@ private fun HeaderRow(onOpenSettings: () -> Unit) {
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(stringResource(greeting), fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
+            Text(stringResource(greeting), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
             Spacer(Modifier.height(4.dp))
             Text(
                 // 日期格式中英文语序不同，pattern 也放在资源里随语言切换
@@ -200,100 +244,64 @@ private fun HeaderRow(onOpenSettings: () -> Unit) {
 }
 
 @Composable
-private fun TimerHeroCard(state: HomeUiState, onToggle: () -> Unit) {
-    Box(
+private fun StatusPill(tracking: Boolean) {
+    Row(
         Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(32.dp))
-            .background(Brush.linearGradient(listOf(Coral, CoralGlow)))
-            .padding(vertical = 28.dp),
+            .clip(CircleShape)
+            .background(CoralSoft)
+            .padding(horizontal = 12.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        // 右下角装饰小人
-        Icon(
-            painterResource(if (state.tracking) R.drawable.ic_walk else R.drawable.ic_seat),
-            null,
-            tint = Color(0x30FFFFFF),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .size(110.dp)
-                .padding(end = 12.dp, bottom = 0.dp),
+        Icon(painterResource(R.drawable.ic_bell_ring), null, tint = Coral, modifier = Modifier.size(12.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(
+            stringResource(if (tracking) R.string.home_pill_tracking else R.string.home_pill_paused),
+            color = Coral,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
         )
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(painterResource(R.drawable.ic_bell_ring), null, tint = Color(0xFFFFE3DA), modifier = Modifier.size(14.dp))
-                Spacer(Modifier.size(6.dp))
-                Text(
-                    stringResource(if (state.tracking) R.string.state_tracking else R.string.state_paused),
-                    color = Color(0xFFFFE3DA),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-            Spacer(Modifier.height(18.dp))
-            Box(contentAlignment = Alignment.Center) {
-                val stroke = 14f
-                Canvas(Modifier.size(190.dp)) {
-                    val diameter = size.minDimension - stroke
-                    drawArc(
-                        color = Color(0x40FFFFFF),
-                        startAngle = -90f,
-                        sweepAngle = 360f,
-                        useCenter = false,
-                        style = Stroke(stroke, cap = StrokeCap.Round),
-                        topLeft = androidx.compose.ui.geometry.Offset(stroke / 2, stroke / 2),
-                        size = androidx.compose.ui.geometry.Size(diameter, diameter),
-                    )
-                    drawArc(
-                        color = Color.White,
-                        startAngle = -90f,
-                        sweepAngle = 360f * state.cycleProgress,
-                        useCenter = false,
-                        style = Stroke(stroke, cap = StrokeCap.Round),
-                        topLeft = androidx.compose.ui.geometry.Offset(stroke / 2, stroke / 2),
-                        size = androidx.compose.ui.geometry.Size(diameter, diameter),
-                    )
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val sec = state.nextRemindInSeconds
-                    Text(
-                        String.format("%02d:%02d", sec / 60, sec % 60),
-                        fontSize = 48.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White,
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(stringResource(R.string.home_next_remind), fontSize = 13.sp, color = Color(0xFFFFE3DA))
-                }
-            }
-            Spacer(Modifier.height(18.dp))
-            Text(
-                stringResource(
-                    R.string.home_sat_this_round,
-                    DurationText.full(LocalContext.current, state.satMinutes),
-                ),
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
+    }
+}
+
+/** 带叶尖的浇水进度条：填满一轮 = 该起来给它浇水了 */
+@Composable
+private fun WaterBar(fraction: Float) {
+    val anim by animateFloatAsState(
+        targetValue = fraction.coerceIn(0f, 1f),
+        animationSpec = tween(600),
+        label = "water",
+    )
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    val fillColor = Mint
+    Canvas(Modifier.fillMaxWidth().height(26.dp)) {
+        val u = 1.dp.toPx()
+        val barH = 10.dp.toPx()
+        val cy = size.height / 2f
+        drawRoundRect(
+            color = trackColor,
+            topLeft = Offset(0f, cy - barH / 2f),
+            size = Size(size.width, barH),
+            cornerRadius = CornerRadius(barH / 2f, barH / 2f),
+        )
+        val fillW = size.width * anim
+        if (fillW > barH) {
+            drawRoundRect(
+                color = fillColor,
+                topLeft = Offset(0f, cy - barH / 2f),
+                size = Size(fillW, barH),
+                cornerRadius = CornerRadius(barH / 2f, barH / 2f),
             )
-            Spacer(Modifier.height(14.dp))
-            FilledIconButton(
-                onClick = onToggle,
-                modifier = Modifier.size(52.dp),
-                shape = CircleShape,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Coral,
-                ),
-            ) {
-                Icon(
-                    painterResource(if (state.tracking) R.drawable.ic_pause else R.drawable.ic_play),
-                    stringResource(if (state.tracking) R.string.action_pause else R.string.action_start),
-                    modifier = Modifier.size(26.dp),
-                )
+        }
+        // 叶尖在填充末端
+        val tx = size.width * anim
+        rotate(-28f, pivot = Offset(tx, cy)) {
+            val leaf = Path().apply {
+                moveTo(tx - 3 * u, cy - 11 * u)
+                quadraticTo(tx - 8 * u, cy - 4 * u, tx - 1 * u, cy - 2 * u)
+                quadraticTo(tx + 6 * u, cy, tx + 5 * u, cy - 6 * u)
+                quadraticTo(tx + 4 * u, cy - 10 * u, tx - 3 * u, cy - 11 * u)
             }
+            drawPath(leaf, fillColor)
         }
     }
 }
@@ -301,53 +309,43 @@ private fun TimerHeroCard(state: HomeUiState, onToggle: () -> Unit) {
 @Composable
 private fun StatChip(
     modifier: Modifier,
-    icon: Int,
     label: String,
     value: String,
-    tint: Color,
     container: Color,
+    tint: Color,
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(20.dp),
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(container)
+            .padding(vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(Modifier.padding(14.dp)) {
-            Box(
-                Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(container),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(painterResource(icon), null, tint = tint, modifier = Modifier.size(18.dp))
-            }
-            Spacer(Modifier.height(10.dp))
-            Text(value, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
-            Spacer(Modifier.height(2.dp))
-            Text(label, fontSize = 11.sp, color = InkGray)
-        }
+        Text(value, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = tint)
+        Spacer(Modifier.height(2.dp))
+        Text(label, fontSize = 10.sp, color = tint)
     }
 }
 
 @Composable
 private fun HintCard() {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = SunnySoft),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(20.dp),
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(SunnySoft)
+            .padding(horizontal = 14.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(painterResource(R.drawable.ic_bulb), null, tint = Sunny, modifier = Modifier.size(22.dp))
-            Spacer(Modifier.size(12.dp))
-            Text(
-                stringResource(R.string.home_hint),
-                fontSize = 12.sp,
-                lineHeight = 18.sp,
-                color = SunnyInk,
-            )
-        }
+        Icon(painterResource(R.drawable.ic_bulb), null, tint = Sunny, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(10.dp))
+        Text(
+            stringResource(R.string.home_hint),
+            fontSize = 11.sp,
+            lineHeight = 17.sp,
+            color = SunnyInk,
+        )
     }
 }
 
@@ -363,7 +361,7 @@ private fun StandConfirmDialog(satMinutes: Long, onDismiss: () -> Unit, onConfir
                     .background(MintSoft),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(painterResource(R.drawable.ic_handsup), null, tint = Mint, modifier = Modifier.size(30.dp))
+                Icon(painterResource(R.drawable.ic_drop), null, tint = Mint, modifier = Modifier.size(28.dp))
             }
         },
         title = { Text(stringResource(R.string.dialog_stand_title), fontWeight = FontWeight.ExtraBold) },

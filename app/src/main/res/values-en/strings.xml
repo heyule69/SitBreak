@@ -36,7 +36,8 @@
     <string name="home_stat_stands">Stands today</string>
     <string name="home_stat_streak">Streak</string>
     <string name="home_next_remind">until your next break</string>
-    <string name="home_sat_this_round">Sitting for %1$s this round</string>
+    <string name="home_pill_tracking">Tracking · waiting for water</string>
+    <string name="home_pill_paused">Paused · plant is asleep</string>
     <string name="home_hint">Standing up for 2–3 minutes after 20–30 minutes of sitting\nis best for your metabolism and heart.</string>
     <string name="action_pause">Pause</string>
     <string name="action_start">Start</string>
@@ -140,7 +141,7 @@
     <string name="perm_exact_alarm_ok">Allowed, reminders fire on time</string>
     <string name="perm_exact_alarm_missing">Without it reminders may be delayed</string>
     <string name="perm_action_open">Grant</string>
-    <string name="about_version">SitBreak v1.1.0</string>
+    <string name="about_version">SitBreak v1.2.0</string>
     <string name="about_slogan">Sitting too long hurts — get up and move!</string>
     <string name="settings_section_general">General</string>
     <string name="settings_entry_widget">Home screen widget</string>

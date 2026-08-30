@@ -28,6 +28,8 @@ private val InkGrayLight = Color(0xFF8A8580)
 private val WarmBgLight = Color(0xFFFFF9F5)
 private val CardWhiteLight = Color(0xFFFFFFFF)
 private val OnSoftContainerLight = Color(0xFF665148)
+/** 首页插画脚下的奶油地台 */
+private val PlantHillLight = Color(0xFFFFEEDC)
 
 // 深色版：主色提亮保证对比度，Soft 容器色翻成同色系低明度底，
 // 叠在容器上的深色文字则要反过来提亮，否则深底深字直接看不见。
@@ -48,6 +50,7 @@ private val InkGrayDark = Color(0xFFA6A09A)
 private val WarmBgDark = Color(0xFF14161A)
 private val CardWhiteDark = Color(0xFF1C1F24)
 private val OnSoftContainerDark = Color(0xFFE6D8D1)
+private val PlantHillDark = Color(0xFF21242B)
 
 /**
  * 品牌色不属于 Material 的 ColorScheme，但同样要跟随深浅色切换。
@@ -92,6 +95,8 @@ val InkGray: Color
     @Composable @ReadOnlyComposable get() = pick(LocalDarkPalette.current, InkGrayLight, InkGrayDark)
 val WarmBg: Color
     @Composable @ReadOnlyComposable get() = pick(LocalDarkPalette.current, WarmBgLight, WarmBgDark)
+val PlantHill: Color
+    @Composable @ReadOnlyComposable get() = pick(LocalDarkPalette.current, PlantHillLight, PlantHillDark)
 val CardWhite: Color
     @Composable @ReadOnlyComposable get() = pick(LocalDarkPalette.current, CardWhiteLight, CardWhiteDark)
 

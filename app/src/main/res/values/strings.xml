@@ -34,7 +34,8 @@
     <string name="home_stat_stands">今日站立</string>
     <string name="home_stat_streak">连续打卡</string>
     <string name="home_next_remind">后提醒你活动</string>
-    <string name="home_sat_this_round">本次已坐 %1$s</string>
+    <string name="home_pill_tracking">久坐追踪中 · 等你浇水</string>
+    <string name="home_pill_paused">追踪暂停 · 小苗睡了</string>
     <string name="home_hint">久坐 20~30 分钟后起身活动 2~3 分钟，\n对代谢与心血管最有益。</string>
     <string name="action_pause">暂停</string>
     <string name="action_start">开始</string>
@@ -138,7 +139,7 @@
     <string name="perm_exact_alarm_ok">已允许，提醒将准时触发</string>
     <string name="perm_exact_alarm_missing">未允许时提醒可能略有延迟，建议开启</string>
     <string name="perm_action_open">去开启</string>
-    <string name="about_version">SitBreak v1.1.0</string>
+    <string name="about_version">SitBreak v1.2.0</string>
     <string name="about_slogan">久坐有害健康，快起来动一动吧！</string>
     <string name="settings_section_general">通用</string>
     <string name="settings_entry_widget">桌面小组件</string>
