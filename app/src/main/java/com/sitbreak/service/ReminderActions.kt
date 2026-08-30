@@ -28,7 +28,11 @@ object ReminderActions {
                 context,
                 QuietHours.nextReminderDelay(now, s.intervalMinutes, s.quietWindow),
             )
-            ReminderForegroundService.start(context, ReminderForegroundService.ACTION_RESET_SESSION)
+            // 从小组件/智能暂停进来时应用在后台，部分 ROM 会拦前台服务启动；
+            // 闹钟已重排，常驻通知丢了等前台再补，不能让打卡流程崩掉
+            runCatching {
+                ReminderForegroundService.start(context, ReminderForegroundService.ACTION_RESET_SESSION)
+            }
         }
         SitBreakWidget.refresh(context)
         // 成就检查（首次站立等）

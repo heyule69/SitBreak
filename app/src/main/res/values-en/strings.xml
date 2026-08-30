@@ -98,8 +98,23 @@
     <string name="ach_streak_30_desc">Stand up 30 days in a row</string>
     <string name="ach_light_day_title">Easy day</string>
     <string name="ach_light_day_desc">Sit less than 6 hours in a day</string>
+    <string name="ach_stand_12_title">Fully charged</string>
+    <string name="ach_stand_12_desc">Log 12 stand-ups in a single day</string>
+    <string name="ach_streak_14_title">Fortnight</string>
+    <string name="ach_streak_14_desc">Stand up 14 days in a row</string>
+    <string name="ach_total_500_title">Legend of 500</string>
+    <string name="ach_total_500_desc">Log 500 stand-ups in total</string>
+    <string name="ach_weekend_title">Weekend warrior</string>
+    <string name="ach_weekend_desc">Stand up on both days of the same weekend</string>
+    <string name="ach_tamer_title">Sitting tamer</string>
+    <string name="ach_tamer_desc">Sit less than 8 hours a day, on 7 days</string>
     <string name="ach_century_title">Century</string>
     <string name="ach_century_desc">Log 100 stand-ups in total</string>
+    <string name="ach_page_title">Badges</string>
+    <string name="ach_summary_unlocked">Unlocked</string>
+    <string name="ach_summary_progress">Overall</string>
+    <string name="ach_detail_take">Collect!</string>
+    <string name="ach_detail_keep">Keep going</string>
 
     <!-- Stats -->
     <string name="stats_title">Stats &amp; badges</string>
@@ -114,6 +129,7 @@
     <string name="stats_legend_sedentary">Sitting time</string>
     <string name="stats_unlocked">Unlocked</string>
     <string name="stats_percent">%1$d%%</string>
+    <string name="stats_view_all">View all</string>
 
     <!-- Settings -->
     <string name="settings_section_rhythm">Reminder rhythm</string>
@@ -141,7 +157,7 @@
     <string name="perm_exact_alarm_ok">Allowed, reminders fire on time</string>
     <string name="perm_exact_alarm_missing">Without it reminders may be delayed</string>
     <string name="perm_action_open">Grant</string>
-    <string name="about_version">SitBreak v1.2.0</string>
+    <string name="about_version">SitBreak v1.3.0</string>
     <string name="about_slogan">Sitting too long hurts — get up and move!</string>
     <string name="settings_section_general">General</string>
     <string name="settings_entry_widget">Home screen widget</string>

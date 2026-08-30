@@ -4,7 +4,10 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
+    <!-- 粗圆头：给软色圆钮里的符号用，细线在小按钮上显弱 -->
     <path
-        android:fillColor="#FF000000"
-        android:pathData="M19,13H5V11H19V13Z" />
+        android:pathData="M6,12 h12"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="3.4"
+        android:strokeLineCap="round" />
 </vector>

@@ -1,8 +1,16 @@
 package com.sitbreak.ui.stats
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +37,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -65,6 +76,29 @@ fun StatsRoute(app: SitBreakApp) {
 
 @Composable
 fun StatsScreen(state: StatsUiState) {
+    // 徽章专属页的两级导航，同设置页的子页模式
+    var showBadges by rememberSaveable { mutableStateOf(false) }
+    BackHandler(enabled = showBadges) { showBadges = false }
+    AnimatedContent(
+        targetState = showBadges,
+        label = "stats_nav",
+        transitionSpec = {
+            if (targetState) {
+                (slideInHorizontally { it / 3 } + fadeIn()) togetherWith
+                    (slideOutHorizontally { -it / 3 } + fadeOut())
+            } else {
+                (slideInHorizontally { -it / 3 } + fadeIn()) togetherWith
+                    (slideOutHorizontally { it / 3 } + fadeOut())
+            }
+        },
+    ) { badges ->
+        if (badges) AchievementsPage(state) { showBadges = false }
+        else StatsOverview(state) { showBadges = true }
+    }
+}
+
+@Composable
+private fun StatsOverview(state: StatsUiState, onOpenBadges: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,8 +119,13 @@ fun StatsScreen(state: StatsUiState) {
         Spacer(Modifier.height(10.dp))
         WeeklyChart(state.last7Days)
         Spacer(Modifier.height(16.dp))
-        
-        Row(verticalAlignment = Alignment.CenterVertically) {
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpenBadges),
+        ) {
             Text(stringResource(R.string.stats_badges), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.weight(1f))
             Text(
@@ -97,6 +136,19 @@ fun StatsScreen(state: StatsUiState) {
                 ),
                 fontSize = 13.sp,
                 color = InkGray,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                stringResource(R.string.stats_view_all),
+                fontSize = 13.sp,
+                color = Coral,
+                fontWeight = FontWeight.Bold,
+            )
+            Icon(
+                painterResource(R.drawable.ic_chevron_right),
+                contentDescription = stringResource(R.string.stats_view_all),
+                tint = Coral,
+                modifier = Modifier.size(16.dp),
             )
         }
         Spacer(Modifier.height(10.dp))
@@ -304,6 +356,8 @@ private fun AchievementRow(states: List<com.sitbreak.domain.AchievementState>) {
 
 @Composable
 private fun AchievementCard(modifier: Modifier, a: com.sitbreak.domain.AchievementState) {
+    // 每枚徽章自己的图标与配色；未解锁用灰色底 + 灰图标，进度条保留彩色提示
+    val (tint, container) = badgeToneColors(a.achievement.tone)
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
@@ -319,14 +373,14 @@ private fun AchievementCard(modifier: Modifier, a: com.sitbreak.domain.Achieveme
                     Modifier
                         .size(38.dp)
                         .clip(CircleShape)
-                        .background(if (a.unlocked) Coral else MaterialTheme.colorScheme.outline),
+                        .background(if (a.unlocked) container else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        painterResource(if (a.unlocked) R.drawable.ic_medal else R.drawable.ic_trophy),
+                        painterResource(a.achievement.iconRes),
                         null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp).alpha(if (a.unlocked) 1f else 0.5f),
+                        tint = if (a.unlocked) tint else InkGray.copy(alpha = 0.7f),
+                        modifier = Modifier.size(20.dp).alpha(if (a.unlocked) 1f else 0.7f),
                     )
                 }
                 Spacer(Modifier.width(10.dp))
@@ -341,7 +395,7 @@ private fun AchievementCard(modifier: Modifier, a: com.sitbreak.domain.Achieveme
                         if (a.unlocked) stringResource(R.string.stats_unlocked)
                         else stringResource(R.string.stats_percent, (a.progress * 100).toInt()),
                         fontSize = 11.sp,
-                        color = if (a.unlocked) Coral else InkGray,
+                        color = if (a.unlocked) tint else InkGray,
                         fontWeight = FontWeight.Bold,
                     )
                 }
@@ -359,14 +413,14 @@ private fun AchievementCard(modifier: Modifier, a: com.sitbreak.domain.Achieveme
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.outline),
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
             ) {
                 Box(
                     Modifier
                         .fillMaxWidth(a.progress)
                         .height(6.dp)
                         .clip(CircleShape)
-                        .background(if (a.unlocked) Coral else Sunny),
+                        .background(if (a.unlocked) tint else Sunny),
                 )
             }
         }

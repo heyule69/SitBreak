@@ -147,4 +147,65 @@ class AchievementEngineTest {
         )
         assertTrue(states.all { it.progress in 0f..1f })
     }
+
+    @Test
+    fun `stand_12 unlocks only at twelve stands a day`() {
+        val eleven = AchievementEngine.evaluate(listOf(day("2026-03-10", stands = 11)), totalStands = 11)
+        assertFalse(eleven.first { it.achievement.id == "stand_12" }.unlocked)
+
+        val twelve = AchievementEngine.evaluate(listOf(day("2026-03-10", stands = 12)), totalStands = 12)
+        assertTrue(twelve.first { it.achievement.id == "stand_12" }.unlocked)
+    }
+
+    @Test
+    fun `streak_14 sits between streak_7 and streak_30`() {
+        val history = (1..13).map { day("2026-03-" + it.toString().padStart(2, '0'), stands = 1) }
+        val states = AchievementEngine.evaluate(history, totalStands = 13)
+        assertTrue(states.first { it.achievement.id == "streak_7" }.unlocked)
+        assertFalse(states.first { it.achievement.id == "streak_14" }.unlocked)
+        assertFalse(states.first { it.achievement.id == "streak_30" }.unlocked)
+    }
+
+    @Test
+    fun `total_500 needs five hundred stands`() {
+        val below = AchievementEngine.evaluate(emptyList(), totalStands = 499)
+        assertFalse(below.first { it.achievement.id == "total_500" }.unlocked)
+
+        val at = AchievementEngine.evaluate(emptyList(), totalStands = 500)
+        assertTrue(at.first { it.achievement.id == "total_500" }.unlocked)
+    }
+
+    @Test
+    fun `weekend warrior needs both days of one weekend`() {
+        // 2026-03-07 是周六、03-08 周日；只打一天记半程进度
+        val satOnly = AchievementEngine.evaluate(listOf(day("2026-03-07", stands = 1)), totalStands = 1)
+        val satState = satOnly.first { it.achievement.id == "weekend_warrior" }
+        assertFalse(satState.unlocked)
+        assertEquals(0.5f, satState.progress, 0.001f)
+
+        val both = AchievementEngine.evaluate(
+            listOf(day("2026-03-07", stands = 1), day("2026-03-08", stands = 1)),
+            totalStands = 2,
+        )
+        assertTrue(both.first { it.achievement.id == "weekend_warrior" }.unlocked)
+    }
+
+    @Test
+    fun `tamer_7 needs seven tracked days under eight hours`() {
+        val sixDays = (1..6).map { day("2026-03-0$it", sedentary = 300, reminders = 5) }
+        assertFalse(
+            AchievementEngine.evaluate(sixDays, totalStands = 6)
+                .first { it.achievement.id == "tamer_7" }.unlocked,
+        )
+
+        val sevenDays = sixDays + day("2026-03-07", sedentary = 300, reminders = 5)
+        assertTrue(
+            AchievementEngine.evaluate(sevenDays, totalStands = 7)
+                .first { it.achievement.id == "tamer_7" }.unlocked,
+        )
+
+        // 没有提醒记录的空白日不算，否则从没打开 App 的日子会白送达标天数
+        val untracked = (1..7).map { day("2026-03-0$it", sedentary = 0, reminders = 0) }
+        assertEquals(0, AchievementEngine.tamerDays(untracked))
+    }
 }

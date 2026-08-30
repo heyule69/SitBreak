@@ -96,8 +96,23 @@
     <string name="ach_streak_30_desc">连续 30 天都有站立打卡</string>
     <string name="ach_light_day_title">轻盈的一天</string>
     <string name="ach_light_day_desc">单日累计久坐 &lt; 6 小时</string>
+    <string name="ach_stand_12_title">今日满电</string>
+    <string name="ach_stand_12_desc">单日站立确认 ≥ 12 次</string>
+    <string name="ach_streak_14_title">双周坚持</string>
+    <string name="ach_streak_14_desc">连续 14 天都有站立打卡</string>
+    <string name="ach_total_500_title">五百传奇</string>
+    <string name="ach_total_500_desc">累计站立确认 500 次</string>
+    <string name="ach_weekend_title">周末也在线</string>
+    <string name="ach_weekend_desc">同一个周末，周六周日都有打卡</string>
+    <string name="ach_tamer_title">久坐驯服师</string>
+    <string name="ach_tamer_desc">累计 7 天单日久坐 &lt; 8 小时</string>
     <string name="ach_century_title">百次站立</string>
     <string name="ach_century_desc">累计站立确认 100 次</string>
+    <string name="ach_page_title">成就徽章</string>
+    <string name="ach_summary_unlocked">已解锁</string>
+    <string name="ach_summary_progress">总进度</string>
+    <string name="ach_detail_take">收下啦！</string>
+    <string name="ach_detail_keep">继续加油</string>
 
     <!-- 统计 -->
     <string name="stats_title">数据与成就</string>
@@ -112,6 +127,7 @@
     <string name="stats_legend_sedentary">久坐时长</string>
     <string name="stats_unlocked">已解锁</string>
     <string name="stats_percent">%1$d%%</string>
+    <string name="stats_view_all">查看全部</string>
 
     <!-- 设置 -->
     <string name="settings_section_rhythm">提醒节奏</string>
@@ -139,7 +155,7 @@
     <string name="perm_exact_alarm_ok">已允许，提醒将准时触发</string>
     <string name="perm_exact_alarm_missing">未允许时提醒可能略有延迟，建议开启</string>
     <string name="perm_action_open">去开启</string>
-    <string name="about_version">SitBreak v1.2.0</string>
+    <string name="about_version">SitBreak v1.3.0</string>
     <string name="about_slogan">久坐有害健康，快起来动一动吧！</string>
     <string name="settings_section_general">通用</string>
     <string name="settings_entry_widget">桌面小组件</string>

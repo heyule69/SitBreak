@@ -173,6 +173,7 @@ fun StepperSliderRow(
         StepperButton(
             iconRes = R.drawable.ic_minus,
             tint = accent,
+            container = trackColor,
             enabled = value > valueRange.start,
         ) { onValueChange((value - 1).coerceAtLeast(valueRange.start.toInt())) }
         SitBreakSlider(
@@ -191,6 +192,7 @@ fun StepperSliderRow(
         StepperButton(
             iconRes = R.drawable.ic_plus,
             tint = accent,
+            container = trackColor,
             enabled = value < valueRange.endInclusive,
         ) { onValueChange((value + 1).coerceAtMost(valueRange.endInclusive.toInt())) }
     }

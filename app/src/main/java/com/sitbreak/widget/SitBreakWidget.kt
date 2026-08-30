@@ -34,12 +34,19 @@ class SitBreakWidget : AppWidgetProvider() {
         }
     }
 
-    /** BroadcastReceiver 生命周期很短，用 goAsync 保住进程直到协程结束 */
+    /**
+     * BroadcastReceiver 生命周期很短，用 goAsync 保住进程直到协程结束。
+     *
+     * 必须吞掉异常：部分国产 ROM 会拦截后台的前台服务启动，一旦这里抛出去，
+     * 未捕获的协程异常会直接杀进程 —— 用户看到的就是"点了没反应"。
+     */
     private fun asyncWork(block: suspend () -> Unit) {
         val pending = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
                 block()
+            } catch (t: Throwable) {
+                t.printStackTrace()
             } finally {
                 pending.finish()
             }
@@ -77,7 +84,9 @@ class SitBreakWidget : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_stand, c.getString(R.string.widget_action_open))
             views.setOnClickPendingIntent(R.id.widget_stand, openAppIntent(context))
         }
-        // 卡片其他区域一律打开应用
+        // 根布局兜底：子控件没绑点击的区域（图标、副标题、留白）点上去也要有反应，
+        // 否则 3x2 格子里大半面积是死区，用户的感觉就是"小组件点不动"
+        views.setOnClickPendingIntent(R.id.widget_root, openAppIntent(context))
         views.setOnClickPendingIntent(R.id.widget_countdown, openAppIntent(context))
         views.setOnClickPendingIntent(R.id.widget_state, openAppIntent(context))
 
@@ -96,7 +105,9 @@ class SitBreakWidget : AppWidgetProvider() {
         PendingIntent.getActivity(
             context,
             REQUEST_OPEN,
-            Intent(context, MainActivity::class.java),
+            // 从桌面点击没有 Activity 栈可依附，必须显式开新任务（singleTask 保证不重复实例）
+            Intent(context, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 

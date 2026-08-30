@@ -334,7 +334,13 @@ private fun EntryRow(entry: Entry, onClick: () -> Unit) {
     }
 }
 
-/** 子页骨架：返回箭头 + 标题 + 可滚动内容 */
+/**
+ * 子页骨架：返回箭头 + 标题 + 可滚动内容。
+ *
+ * 内容不足一屏时垂直居中（否则短页面下半屏全是空白，内容显得堆在顶部）。
+ * 不能用 fillMaxSize + Arrangement.Center：内容超屏时居中排布会把顶部裁掉
+ * 且滚不到。让滚动列只包内容、由外层 Box 居中，两种情况都正确。
+ */
 @Composable
 private fun SubPage(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
     Column(
@@ -356,13 +362,17 @@ private fun SubPage(title: String, onBack: () -> Unit, content: @Composable () -
             }
             Text(title, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
         }
-        Column(
-            Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
-        ) {
-            content()
-            Spacer(Modifier.height(24.dp))
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            Column(
+                Modifier
+                    .align(Alignment.Center)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp),
+            ) {
+                Spacer(Modifier.height(12.dp))
+                content()
+                Spacer(Modifier.height(24.dp))
+            }
         }
     }
 }
