@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SitBreak</string>
+
+    <!-- Common -->
+    <string name="state_tracking">Tracking your sitting</string>
+    <string name="state_paused">Tracking paused</string>
+    <string name="action_stand">I stood up</string>
+    <string name="action_back">Back</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="duration_hours_minutes">%1$d hr %2$d min</string>
+    <string name="duration_minutes_short">%1$dm</string>
+    <string name="duration_hours_short">%1$dh</string>
+    <string name="duration_hours_minutes_short">%1$dh %2$dm</string>
+    <plurals name="value_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="value_times">
+        <item quantity="one">%1$d time</item>
+        <item quantity="other">%1$d times</item>
+    </plurals>
+
+    <!-- Bottom navigation -->
+    <string name="tab_home">Home</string>
+    <string name="tab_stats">Stats</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Home -->
+    <string name="greeting_night">Still up?</string>
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="home_date_pattern">EEEE, MMM d</string>
+    <string name="home_stat_sedentary">Sitting today</string>
+    <string name="home_stat_stands">Stands today</string>
+    <string name="home_stat_streak">Streak</string>
+    <string name="home_next_remind">until your next break</string>
+    <string name="home_sat_this_round">Sitting for %1$s this round</string>
+    <string name="home_hint">Standing up for 2–3 minutes after 20–30 minutes of sitting\nis best for your metabolism and heart.</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_start">Start</string>
+    <string name="dialog_stand_title">Did you stand up?</string>
+    <string name="dialog_stand_text">You sat for %1$s in that round.\nLogged! Grab some water and stretch a little.</string>
+    <string name="dialog_stand_confirm">Log it</string>
+    <string name="dialog_stand_dismiss">Not yet</string>
+
+    <!-- Onboarding -->
+    <string name="ob_chip_smart">Smart plan</string>
+    <string name="ob_chip_light">Gentle nudge</string>
+    <string name="ob_chip_achieve">Badges</string>
+    <string name="ob_welcome_desc">Been sitting a while? Time to move.\nWe tailor your break rhythm to your age and body.</string>
+    <string name="ob_cta_start">Build my plan</string>
+    <string name="ob_skip">Skip and use the smart default</string>
+    <string name="ob_body_title">Tell us a bit about you</string>
+    <string name="ob_body_desc">We use this to estimate your sedentary risk and suggest an interval</string>
+    <string name="label_age">Age</string>
+    <string name="label_height">Height</string>
+    <string name="label_weight">Weight</string>
+    <string name="unit_years">yrs</string>
+    <string name="unit_cm">cm</string>
+    <string name="unit_kg">kg</string>
+    <string name="ob_cta_next">Next · generate my plan</string>
+    <string name="ob_plan_title">Your plan is ready</string>
+    <string name="ob_plan_desc">Calculated from your age and BMI — adjustable any time</string>
+    <string name="ob_rhythm_custom">My custom rhythm</string>
+    <string name="ob_rhythm_smart">Suggested rhythm</string>
+    <string name="ob_minutes_per_break">min / break</string>
+    <string name="ob_chip_age">%1$s · %2$d yrs</string>
+    <string name="ob_chip_bmi">BMI %1$d · %2$s</string>
+    <string name="ob_drag_hint">Want it looser or tighter? Drag it.</string>
+    <string name="range_minutes">%1$d–%2$d min</string>
+    <string name="ob_cta_done">Looks good, let\'s start</string>
+
+    <!-- Recommendation engine -->
+    <string name="age_label_youth">Young adult</string>
+    <string name="age_label_young_adult">Adult</string>
+    <string name="age_label_middle">Middle-aged</string>
+    <string name="age_label_senior">Older adult</string>
+    <string name="bmi_label_underweight">Underweight</string>
+    <string name="bmi_label_normal">Normal</string>
+    <string name="bmi_label_overweight">Overweight</string>
+    <string name="bmi_label_obese">Obese</string>
+    <string name="advice_high_risk">Higher sedentary risk — move more often</string>
+    <string name="advice_keep_going">Keep moving every 30 to 60 minutes</string>
+
+    <!-- Achievements -->
+    <string name="ach_first_stand_title">First step</string>
+    <string name="ach_first_stand_desc">Log your first stand-up</string>
+    <string name="ach_stand_8_title">Active day</string>
+    <string name="ach_stand_8_desc">Log 8 stand-ups in a single day</string>
+    <string name="ach_streak_3_title">3 in a row</string>
+    <string name="ach_streak_3_desc">Stand up 3 days in a row</string>
+    <string name="ach_streak_7_title">A full week</string>
+    <string name="ach_streak_7_desc">Stand up 7 days in a row</string>
+    <string name="ach_streak_30_title">Iron month</string>
+    <string name="ach_streak_30_desc">Stand up 30 days in a row</string>
+    <string name="ach_light_day_title">Easy day</string>
+    <string name="ach_light_day_desc">Sit less than 6 hours in a day</string>
+    <string name="ach_century_title">Century</string>
+    <string name="ach_century_desc">Log 100 stand-ups in total</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Stats &amp; badges</string>
+    <string name="stats_last7">Last 7 days</string>
+    <string name="stats_badges">Badges</string>
+    <string name="stats_badge_ratio">%1$d/%2$d</string>
+    <string name="stats_streak_days">%1$d-day streak</string>
+    <string name="stats_best_streak">Best streak</string>
+    <string name="stats_total_stands">Total stands</string>
+    <string name="stats_empty">No data yet — log your first stand-up!</string>
+    <string name="stats_legend_stands">Stand-ups</string>
+    <string name="stats_legend_sedentary">Sitting time</string>
+    <string name="stats_unlocked">Unlocked</string>
+    <string name="stats_percent">%1$d%%</string>
+
+    <!-- Settings -->
+    <string name="settings_section_rhythm">Reminder rhythm</string>
+    <string name="settings_section_style">Reminder style</string>
+    <string name="settings_section_tracking">Tracking</string>
+    <string name="settings_section_permission">Permissions</string>
+    <string name="settings_section_about">About</string>
+    <string name="interval_title">Reminder interval</string>
+    <string name="interval_is_recommended">Using the smart suggestion</string>
+    <string name="interval_custom">Custom</string>
+    <string name="unit_minutes">min</string>
+    <string name="interval_recommend">Suggested: %1$d min</string>
+    <string name="action_restore">Restore</string>
+    <string name="style_light_title">Gentle (recommended)</string>
+    <string name="style_light_desc">Just a notification and one short buzz</string>
+    <string name="style_standard_title">Standard</string>
+    <string name="style_standard_desc">Notification sound with regular vibration</string>
+    <string name="style_strong_title">Insistent</string>
+    <string name="style_strong_desc">Rings and vibrates for 30s until you confirm</string>
+    <string name="tracking_title">Sitting tracker</string>
+    <string name="tracking_on">Running — you\'ll be nudged on time</string>
+    <string name="tracking_off">Paused</string>
+    <string name="perm_exact_alarm_title">Exact alarms</string>
+    <string name="perm_exact_alarm_ok">Allowed, reminders fire on time</string>
+    <string name="perm_exact_alarm_missing">Without it reminders may be delayed</string>
+    <string name="perm_action_open">Grant</string>
+    <string name="about_version">SitBreak v1.0.0</string>
+    <string name="about_credits">Icons from Iconify (Material Design Icons), photos from Pexels.\nSitting too long hurts — get up and move!</string>
+
+    <!-- Language -->
+    <string name="settings_section_language">Language</string>
+    <string name="language_title">Display language</string>
+    <string name="language_follow_system">Follow system</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_ongoing">Sitting timer</string>
+    <string name="notif_channel_ongoing_desc">Ongoing notification with your sitting time and next break</string>
+    <string name="notif_channel_light">Gentle reminder</string>
+    <string name="notif_channel_light_desc">Notification with one short buzz</string>
+    <string name="notif_channel_standard">Standard reminder</string>
+    <string name="notif_channel_standard_desc">Notification sound and regular vibration</string>
+    <string name="notif_channel_strong">Insistent reminder</string>
+    <string name="notif_channel_strong_desc">Rings and vibrates for 30 seconds until you confirm</string>
+    <string name="notif_channel_achievement">Badges</string>
+    <string name="notif_channel_achievement_desc">Congratulations when you unlock a badge</string>
+    <string name="notif_ongoing_title">Sitting for %1$s</string>
+    <string name="notif_ongoing_text">Next nudge in %1$s</string>
+    <string name="notif_paused_title">Reminders paused</string>
+    <string name="notif_paused_text">Tap start to resume tracking</string>
+    <string name="notif_reminder_title">Time to stand up!</string>
+    <string name="notif_reminder_text">You\'ve been sitting for %1$s — move for 2 minutes</string>
+    <string name="notif_achievement_title">Badge unlocked · %1$s</string>
+
+    <!-- Home screen widget -->
+    <string name="widget_description">See the countdown and log a break from your home screen</string>
+    <string name="widget_placeholder_time">--</string>
+    <string name="widget_sub_next">min until your break</string>
+    <string name="widget_sub_remain">min until your break · sat %1$d min</string>
+    <string name="widget_sub_paused">Tap below to resume tracking</string>
+    <string name="widget_action_open">Open app</string>
+
+    <!-- Quiet hours and smart pause -->
+    <string name="settings_section_quiet">Do not disturb</string>
+    <string name="quiet_title">Quiet hours</string>
+    <string name="quiet_desc_off">Off — you\'ll be reminded all day</string>
+    <string name="quiet_desc_on">No reminders from %1$s to %2$s</string>
+    <string name="quiet_start">From</string>
+    <string name="quiet_end">To</string>
+    <string name="smart_pause_title">Smart pause</string>
+    <string name="smart_pause_desc">Logs a break automatically when you walk around</string>
+    <string name="smart_pause_unsupported">No step sensor on this device</string>
+    <string name="smart_pause_need_permission">Needs the activity recognition permission</string>
+</resources>

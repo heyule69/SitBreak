@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 冷启动第一帧：窗口背景直接画品牌底 + 图标，避免出现一片白 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/launcher_bg" />
+    <item
+        android:width="120dp"
+        android:height="120dp"
+        android:drawable="@drawable/ic_launcher_foreground"
+        android:gravity="center" />
+</layer-list>

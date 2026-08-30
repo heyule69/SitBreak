@@ -1,0 +1,21 @@
+# 构建产物
+build/
+app/build/
+
+# Gradle / IDE / 本机环境
+.gradle/
+.kotlin/
+local.properties
+.idea/
+*.iml
+
+# 本地会话记忆与调试产物（不随仓库分发）
+memory/
+.claude/
+tools/imgtmp/
+tools/shots/
+tools/ui.xml
+
+# 系统文件
+Thumbs.db
+.DS_Store

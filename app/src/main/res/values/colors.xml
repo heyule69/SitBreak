@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_coral">#FF6B4A</color>
+    <color name="brand_mint">#2BC0A4</color>
+    <color name="launcher_bg">#FF6B4A</color>
+    <!-- 与 Compose 主题的 background 对齐，深色由 values-night 覆盖 -->
+    <color name="window_bg">#FFF9F5</color>
+</resources>

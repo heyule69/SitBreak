@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.SitBreak" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- 深色底上状态栏图标要用浅色 -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/window_bg</item>
+    </style>
+
+    <style name="Theme.SitBreak.Launch" parent="Theme.SitBreak">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+</resources>

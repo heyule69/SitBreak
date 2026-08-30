@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  声明应用支持的语言。Android 13+ 会据此在「系统设置 → 应用 → SitBreak → 语言」
+  里生成语言入口，与应用内的语言选择共用同一份数据。
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="zh-CN" />
+    <locale android:name="en" />
+</locale-config>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SitBreak 久坐提醒</string>
+
+    <!-- 通用 -->
+    <string name="state_tracking">久坐追踪中</string>
+    <string name="state_paused">追踪已暂停</string>
+    <string name="action_stand">我站起来了</string>
+    <string name="action_back">上一步</string>
+    <string name="duration_minutes">%1$d 分钟</string>
+    <string name="duration_hours_minutes">%1$d 小时 %2$d 分</string>
+    <string name="duration_minutes_short">%1$d 分</string>
+    <string name="duration_hours_short">%1$dh</string>
+    <string name="duration_hours_minutes_short">%1$dh %2$dm</string>
+    <plurals name="value_days">
+        <item quantity="other">%1$d 天</item>
+    </plurals>
+    <plurals name="value_times">
+        <item quantity="other">%1$d 次</item>
+    </plurals>
+
+    <!-- 底部导航 -->
+    <string name="tab_home">首页</string>
+    <string name="tab_stats">统计</string>
+    <string name="tab_settings">设置</string>
+
+    <!-- 首页 -->
+    <string name="greeting_night">夜深了</string>
+    <string name="greeting_morning">早上好</string>
+    <string name="greeting_afternoon">下午好</string>
+    <string name="greeting_evening">晚上好</string>
+    <string name="home_date_pattern">M月d日 EEEE</string>
+    <string name="home_stat_sedentary">今日久坐</string>
+    <string name="home_stat_stands">今日站立</string>
+    <string name="home_stat_streak">连续打卡</string>
+    <string name="home_next_remind">后提醒你活动</string>
+    <string name="home_sat_this_round">本次已坐 %1$s</string>
+    <string name="home_hint">久坐 20~30 分钟后起身活动 2~3 分钟，\n对代谢与心血管最有益。</string>
+    <string name="action_pause">暂停</string>
+    <string name="action_start">开始</string>
+    <string name="dialog_stand_title">站起来了？</string>
+    <string name="dialog_stand_text">刚刚一轮你连续坐了 %1$s。\n打卡成功，去倒杯水舒展一下吧！</string>
+    <string name="dialog_stand_confirm">确认打卡</string>
+    <string name="dialog_stand_dismiss">再坐一会</string>
+
+    <!-- 引导 -->
+    <string name="ob_chip_smart">智能规划</string>
+    <string name="ob_chip_light">轻提醒</string>
+    <string name="ob_chip_achieve">成就打卡</string>
+    <string name="ob_welcome_desc">坐久了，起来动一动。\n根据你的年龄与身材，智能定制专属提醒节奏。</string>
+    <string name="ob_cta_start">定制我的专属计划</string>
+    <string name="ob_skip">跳过，直接使用智能推荐</string>
+    <string name="ob_body_title">告诉我们你的基本情况</string>
+    <string name="ob_body_desc">我们将据此计算你的久坐风险，智能推荐提醒间隔</string>
+    <string name="label_age">年龄</string>
+    <string name="label_height">身高</string>
+    <string name="label_weight">体重</string>
+    <string name="unit_years">岁</string>
+    <string name="unit_cm">cm</string>
+    <string name="unit_kg">kg</string>
+    <string name="ob_cta_next">下一步 · 生成我的方案</string>
+    <string name="ob_plan_title">你的专属方案已生成</string>
+    <string name="ob_plan_desc">基于你的年龄与 BMI 智能计算，可随时调整</string>
+    <string name="ob_rhythm_custom">我的自定义节奏</string>
+    <string name="ob_rhythm_smart">智能推荐节奏</string>
+    <string name="ob_minutes_per_break">分钟 / 次</string>
+    <string name="ob_chip_age">%1$s · %2$d 岁</string>
+    <string name="ob_chip_bmi">BMI %1$d · %2$s</string>
+    <string name="ob_drag_hint">想更松/更紧？拖一拖</string>
+    <string name="range_minutes">%1$d~%2$d 分钟</string>
+    <string name="ob_cta_done">就这样，开始使用</string>
+
+    <!-- 推荐引擎 -->
+    <string name="age_label_youth">青年</string>
+    <string name="age_label_young_adult">中青年</string>
+    <string name="age_label_middle">中年</string>
+    <string name="age_label_senior">中老年</string>
+    <string name="bmi_label_underweight">偏瘦</string>
+    <string name="bmi_label_normal">正常</string>
+    <string name="bmi_label_overweight">超重</string>
+    <string name="bmi_label_obese">肥胖</string>
+    <string name="advice_high_risk">久坐风险偏高，需更频繁活动</string>
+    <string name="advice_keep_going">保持每半小时到一小时活动一次</string>
+
+    <!-- 成就 -->
+    <string name="ach_first_stand_title">迈出第一步</string>
+    <string name="ach_first_stand_desc">完成第一次站立确认</string>
+    <string name="ach_stand_8_title">频繁活动家</string>
+    <string name="ach_stand_8_desc">单日站立确认 ≥ 8 次</string>
+    <string name="ach_streak_3_title">三连击</string>
+    <string name="ach_streak_3_desc">连续 3 天都有站立打卡</string>
+    <string name="ach_streak_7_title">一周不停歇</string>
+    <string name="ach_streak_7_desc">连续 7 天都有站立打卡</string>
+    <string name="ach_streak_30_title">月度毅力王</string>
+    <string name="ach_streak_30_desc">连续 30 天都有站立打卡</string>
+    <string name="ach_light_day_title">轻盈的一天</string>
+    <string name="ach_light_day_desc">单日累计久坐 &lt; 6 小时</string>
+    <string name="ach_century_title">百次站立</string>
+    <string name="ach_century_desc">累计站立确认 100 次</string>
+
+    <!-- 统计 -->
+    <string name="stats_title">数据与成就</string>
+    <string name="stats_last7">近 7 天</string>
+    <string name="stats_badges">成就徽章</string>
+    <string name="stats_badge_ratio">%1$d/%2$d</string>
+    <string name="stats_streak_days">连续打卡 %1$d 天</string>
+    <string name="stats_best_streak">最长连续</string>
+    <string name="stats_total_stands">累计站立</string>
+    <string name="stats_empty">还没有数据，先去记录第一次站立吧！</string>
+    <string name="stats_legend_stands">站立次数</string>
+    <string name="stats_legend_sedentary">久坐时长</string>
+    <string name="stats_unlocked">已解锁</string>
+    <string name="stats_percent">%1$d%%</string>
+
+    <!-- 设置 -->
+    <string name="settings_section_rhythm">提醒节奏</string>
+    <string name="settings_section_style">提醒方式</string>
+    <string name="settings_section_tracking">追踪</string>
+    <string name="settings_section_permission">权限</string>
+    <string name="settings_section_about">关于</string>
+    <string name="interval_title">提醒间隔</string>
+    <string name="interval_is_recommended">当前为智能推荐值</string>
+    <string name="interval_custom">已自定义</string>
+    <string name="unit_minutes">分钟</string>
+    <string name="interval_recommend">推荐 %1$d 分钟</string>
+    <string name="action_restore">一键恢复</string>
+    <string name="style_light_title">轻提醒（推荐）</string>
+    <string name="style_light_desc">微信风格：只弹通知，轻轻震动一下</string>
+    <string name="style_standard_title">标准提醒</string>
+    <string name="style_standard_desc">通知铃声 + 常规震动</string>
+    <string name="style_strong_title">强提醒</string>
+    <string name="style_strong_desc">持续响铃震动 30 秒，确认站立才会停止</string>
+    <string name="tracking_title">久坐追踪</string>
+    <string name="tracking_on">运行中，到点自动提醒</string>
+    <string name="tracking_off">已暂停</string>
+    <string name="perm_exact_alarm_title">精确闹钟</string>
+    <string name="perm_exact_alarm_ok">已允许，提醒将准时触发</string>
+    <string name="perm_exact_alarm_missing">未允许时提醒可能略有延迟，建议开启</string>
+    <string name="perm_action_open">去开启</string>
+    <string name="about_version">SitBreak v1.0.0</string>
+    <string name="about_credits">图标来自 Iconify (Material Design Icons)，照片来自 Pexels。\n久坐有害健康，快起来动一动吧！</string>
+
+    <!-- 语言 -->
+    <string name="settings_section_language">语言</string>
+    <string name="language_title">显示语言</string>
+    <string name="language_follow_system">跟随系统</string>
+    <!-- 语言名用各自母语书写，不随当前界面语言变化，所以不参与翻译 -->
+    <string name="language_native_zh" translatable="false">简体中文</string>
+    <string name="language_native_en" translatable="false">English</string>
+
+    <!-- 通知 -->
+    <string name="notif_channel_ongoing">久坐计时</string>
+    <string name="notif_channel_ongoing_desc">常驻显示当前久坐时长与下次提醒倒计时</string>
+    <string name="notif_channel_light">轻提醒</string>
+    <string name="notif_channel_light_desc">仅弹通知并轻微震动一下（微信风格）</string>
+    <string name="notif_channel_standard">标准提醒</string>
+    <string name="notif_channel_standard_desc">通知铃声与常规震动</string>
+    <string name="notif_channel_strong">强提醒</string>
+    <string name="notif_channel_strong_desc">持续震动与响铃 30 秒，直到你确认站立</string>
+    <string name="notif_channel_achievement">成就通知</string>
+    <string name="notif_channel_achievement_desc">达成成就时的祝贺通知</string>
+    <string name="notif_ongoing_title">已连续久坐 %1$s</string>
+    <string name="notif_ongoing_text">再过 %1$s 提醒你起来活动</string>
+    <string name="notif_paused_title">久坐提醒已暂停</string>
+    <string name="notif_paused_text">点击开始按钮继续追踪</string>
+    <string name="notif_reminder_title">该站起来啦！</string>
+    <string name="notif_reminder_text">你已连续久坐 %1$s，起来活动 2 分钟吧</string>
+    <string name="notif_achievement_title">成就达成 · %1$s</string>
+
+    <!-- 桌面小组件 -->
+    <string name="widget_description">桌面直接看倒计时，一键打卡</string>
+    <string name="widget_placeholder_time">--</string>
+    <string name="widget_sub_next">分钟后提醒</string>
+    <string name="widget_sub_remain">分钟后提醒 · 已坐 %1$d 分</string>
+    <string name="widget_sub_paused">点按下方恢复追踪</string>
+    <string name="widget_action_open">打开应用</string>
+
+    <!-- 勿扰与智能暂停 -->
+    <string name="settings_section_quiet">免打扰</string>
+    <string name="quiet_title">勿扰时段</string>
+    <string name="quiet_desc_off">关闭中，全天都会提醒</string>
+    <string name="quiet_desc_on">%1$s ~ %2$s 不提醒</string>
+    <string name="quiet_start">开始</string>
+    <string name="quiet_end">结束</string>
+    <string name="smart_pause_title">智能暂停</string>
+    <string name="smart_pause_desc">检测到起身走动自动完成打卡</string>
+    <string name="smart_pause_unsupported">本机没有计步传感器，暂不可用</string>
+    <string name="smart_pause_need_permission">需要活动识别权限才能工作</string>
+</resources>
